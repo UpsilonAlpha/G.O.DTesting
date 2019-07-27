@@ -9,23 +9,83 @@ using UnityEngine;
 
 public class CellManager : MonoBehaviour
 {
+    #region Private Variables
     private static CellManager previousSelected = null;     //Stores details of first selected cell
 
-    public SpriteRenderer render;       //SpriteRenderer of current cell
     private bool isSelected = false;    //Stores if cell has been clicked
 
     //List of directions in which an adjacent cell can be found to match with
     private Vector2[] adjacentDirections = new Vector2[] { new Vector2(-1, -1), new Vector2(-1, 0), new Vector2(-1, 1), new Vector2(1, 1), new Vector2(1, 0), new Vector2(1, -1) };
     private IEnumerator check;
 
-    private Sprite sprite1;   //Renderer of first neighbour quark sprite
-    private Sprite sprite2;   //Renderer of second neighbour quark sprite
+    private SpriteRenderer sprite1;   //Renderer of first neighbour quark sprite
+    private SpriteRenderer sprite2;   //Renderer of second neighbour quark sprite
 
     List<char> flavours = new List<char>(); //A list of quark flavours in the detected quarks
     private int charge = 0; //Total charge of combined quarks in the detected quarks
+    #endregion
 
+    #region Public Variables
     public int protons;     //Number of protons matched
     public int neutrons;    //Number of neutrons matched
+    public SpriteRenderer render;       //SpriteRenderer of current cell
+    #endregion
+
+    #region Utility Functions
+    //Stores the clicked quark
+    private void Select()
+    {
+        isSelected = true;
+        previousSelected = gameObject.GetComponent<CellManager>();
+        previousSelected.render.color = Color.grey;
+    }
+
+    //Removes the clicked quark
+    private void Deselect()
+    {
+        isSelected = false;
+        previousSelected.render.color = Color.white;
+        previousSelected = null;
+    }
+
+    //Sends a raycast and returns hit cell
+    private GameObject getNeighbour(Vector3 castDir)
+    {
+        //Fires a ray in the given direction and returns the hit or lack thereof
+        RaycastHit2D hit = Physics2D.Raycast(transform.position + castDir, new Vector2(0.1f, 0.1f));
+        if (hit.collider != null && hit.collider != this.gameObject.GetComponent<Collider2D>() && hit.collider.gameObject.GetComponent<SpriteRenderer>().sprite != null)
+        {
+            return hit.collider.gameObject;
+        }
+        return null;
+
+    }
+
+    //Sends a raycast to all adjacent cells next to each other to find group of three matches
+    private List<GameObject> getNeighbours()
+    {
+        //Loops through all directions and adds quarks to the list
+        List<GameObject> neighbours = new List<GameObject>();
+        for (int i = 0; i < adjacentDirections.Length; i++)
+        {
+            neighbours.Add(getNeighbour(adjacentDirections[i]));
+        }
+        return neighbours;
+    }
+
+    //Switches sprites using temporary variables
+    public void SwapSprite(SpriteRenderer render2)
+    {
+        if (render.sprite == render2.sprite)
+        {
+            return;
+        }
+
+        Sprite tempSprite = render2.sprite;
+        render2.sprite = render.sprite;
+        render.sprite = tempSprite;
+    }
+    #endregion
 
     public void OnMouseDown()
     {
@@ -54,8 +114,10 @@ public class CellManager : MonoBehaviour
                 {
                     //Swaps sprites with the previously selected cell
                     SwapSprite(previousSelected.render);
-                    ClearMatch();
+                    //Checks both cells that were swapped
                     previousSelected.ClearMatch();
+                    ClearMatch();
+
                     previousSelected.Deselect();
                 }
                 else
@@ -68,83 +130,57 @@ public class CellManager : MonoBehaviour
         }
     }
 
-    //Sends a raycast and returns hit cell
-    private GameObject getNeighbour(Vector3 castDir)
+    public bool ClearMatch()
     {
-        RaycastHit2D hit = Physics2D.Raycast(transform.position + castDir, new Vector2(0.1f, 0.1f));
-        if (hit.collider != null && hit.collider != this.gameObject.GetComponent<Collider2D>())
+        if (BoardManager.instance.IsShifting == true)
         {
-            return hit.collider.gameObject;
-        }
-        return null;
+            return false;
+        }   //Don't match if animations are occuring
 
-    }
-
-    //Sends a raycast to all adjacent cells next to each other to find group of three matches
-    private List<GameObject> getNeighbours()
-    {
-        List<GameObject> neighbours = new List<GameObject>();
-        for (int i = 0; i < adjacentDirections.Length; i++)
+        for (int neighbour = 0; neighbour < 5; neighbour++)
         {
-            neighbours.Add(getNeighbour(adjacentDirections[i]));
-        }
-        return neighbours;
-    }
-
-    public void ClearMatch()
-    {
-        try
-        {
-            if (BoardManager.instance.IsShifting == true)
+            if (getNeighbours()[neighbour] != null && getNeighbours()[neighbour + 1] != null)
             {
-                return;
-            }   //Don't match if animations are occuring
-
-            for (int neighbour = 0; neighbour < 5; neighbour++)
-            {
-                sprite1 = getNeighbours()[neighbour].GetComponent<SpriteRenderer>().sprite;  //Gets the name of a neighbour
-                sprite2 = getNeighbours()[neighbour + 1].GetComponent<SpriteRenderer>().sprite;  //Gets the name of a second common neighbour
+                sprite1 = getNeighbours()[neighbour].GetComponent<SpriteRenderer>();  //Gets the name of a neighbour
+                sprite2 = getNeighbours()[neighbour + 1].GetComponent<SpriteRenderer>();  //Gets the name of a second common neighbour
                 //Ensures that neigbours are there
-                if (sprite1 != null && sprite2 != null)
+                if (sprite1.sprite != null && sprite2.sprite != null)
                 {
 
                     if (MatCheck(sprite1, sprite2))     //Checks for matches, and deletes when a match is found, otherwise returns false
                     {
-                        StopCoroutine(BoardManager.instance.ClearAllMatches());
-                        StartCoroutine(BoardManager.instance.ClearAllMatches());
                         BoardManager.instance.IsShifting = false;
-                        return;
+                        return true;
                     }
                 }
             }
-            //Checks last and first neighbour
-            sprite1 = getNeighbours()[0].GetComponent<SpriteRenderer>().sprite;
-            sprite2 = getNeighbours()[5].GetComponent<SpriteRenderer>().sprite;
-            if (sprite1 != null && sprite2 != null)
+        }
+        //Checks last and first neighbour
+        if (getNeighbours()[0] != null && getNeighbours()[5] != null)
+        {
+            sprite1 = getNeighbours()[0].GetComponent<SpriteRenderer>();
+            sprite2 = getNeighbours()[5].GetComponent<SpriteRenderer>();
+            if (sprite1.sprite != null && sprite2.sprite != null)
             {
                 if (MatCheck(sprite1, sprite2))
                 {
-                    StopCoroutine(BoardManager.instance.ClearAllMatches());
-                    StartCoroutine(BoardManager.instance.ClearAllMatches());
                     BoardManager.instance.IsShifting = false;
-                    return;
+                    return true;
                 }
             }
-            BoardManager.instance.IsShifting = false;
         }
-        catch (ExecutionEngineException e)
-        {
-            print(e);
-        }
+        BoardManager.instance.IsShifting = false;
+        return false;
     }
 
-    public bool MatCheck(Sprite sprite1, Sprite sprite2)
+    public bool MatCheck(SpriteRenderer sprite1, SpriteRenderer sprite2)
     {     
         //Makes an array of the neighbour's flavours
-        char[] flavourarray = { render.sprite.name[render.sprite.name.Length - 1], sprite1.name[sprite1.name.Length - 1], sprite2.name[sprite2.name.Length - 1] };
+        char[] flavourarray = { render.sprite.name[render.sprite.name.Length - 1], sprite1.sprite.name[sprite1.sprite.name.Length - 1], sprite2.sprite.name[sprite2.sprite.name.Length - 1] };
         flavours.AddRange(flavourarray);
+
         //Makes sure all the colors charges are different (so red green and blue)
-        if (sprite1.name[0] != render.sprite.name[0] && sprite2.name[0] != render.sprite.name[0] && sprite2.name[0] != sprite1.name[0])
+        if (sprite1.sprite.name[0] != render.sprite.name[0] && sprite2.sprite.name[0] != render.sprite.name[0] && sprite2.sprite.name[0] != sprite1.sprite.name[0])
         {
             //Checks if there is at least one of each flavour (i.e. there is at least one up or down quark in a triplet)
             if (flavours.Contains('p') && flavours.Contains('n'))
@@ -162,8 +198,8 @@ public class CellManager : MonoBehaviour
                 {
                     //Deletes sprites and resets values
                     neutrons++;
-                    sprite1 = null;
-                    sprite2 = null;
+                    sprite1.sprite = null;
+                    sprite2.sprite = null;
                     render.sprite = null;
                     BoardManager.instance.IsShifting = true;
                     charge = 0;
@@ -173,8 +209,8 @@ public class CellManager : MonoBehaviour
                 if (charge == 1)
                 {
                     protons++;
-                    sprite1 = null;
-                    sprite2 = null;
+                    sprite1.sprite = null;
+                    sprite2.sprite = null;
                     render.sprite = null;
                     BoardManager.instance.IsShifting = true;
                     charge = 0;
@@ -194,29 +230,6 @@ public class CellManager : MonoBehaviour
         return false;
     }
 
-    public void SwapSprite(SpriteRenderer render2)
-    {
-        if (render.sprite == render2.sprite)
-        {
-            return;
-        }
 
-        Sprite tempSprite = render2.sprite;
-        render2.sprite = render.sprite;
-        render.sprite = tempSprite;
-    }
 
-    private void Select()
-    {
-        isSelected = true;
-        previousSelected = gameObject.GetComponent<CellManager>();
-        previousSelected.render.color = Color.grey;
-    }
-
-    private void Deselect()
-    {
-        isSelected = false;
-        previousSelected.render.color = Color.white;
-        previousSelected = null;
-    }
 }

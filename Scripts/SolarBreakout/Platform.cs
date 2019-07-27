@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Platform : MonoBehaviour
 {
-    public float speed = 0.1f;
+    public float speed;
 
     private Vector2 platypos = new Vector2(0, -4);
 

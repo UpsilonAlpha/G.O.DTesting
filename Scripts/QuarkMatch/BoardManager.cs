@@ -16,9 +16,10 @@ public class BoardManager : MonoBehaviour
     public int gridWidth;   //Size of the board
     public int gridHeight;
 
-    public GameObject[,] cells;    //2D array of cell objects
+    public SpriteRenderer[,] cells;    //2D array of cell objects
     private float hexWidth;     //Dimensions of background hexes
     private float hexHeight;
+    private List<SpriteRenderer[]> rows = new List<SpriteRenderer[]>();
 
     //Calls game creation functions
     private void Awake()
@@ -34,12 +35,18 @@ public class BoardManager : MonoBehaviour
         }
         setHexSizes();
         createBoard();
+        rows.Add(new SpriteRenderer[] { cells[0, 0], cells[0, 1], cells[0, 2], cells[0, 3], cells[0, 4], });
+        rows.Add(new SpriteRenderer[] { cells[1, 0], cells[1, 1], cells[1, 2], cells[1, 3], cells[1, 4], });
+        rows.Add(new SpriteRenderer[] { cells[2, 0], cells[2, 1], cells[2, 2], cells[2, 3], cells[2, 4], });
+        rows.Add(new SpriteRenderer[] { cells[3, 0], cells[3, 1], cells[3, 2], cells[3, 3], cells[3, 4], });
+        rows.Add(new SpriteRenderer[] { cells[4, 0], cells[4, 1], cells[4, 2], cells[4, 3], cells[4, 4], });
+
     }
 
     //Creates board and populates with cells
     void createBoard()
     {
-        cells = new GameObject[gridWidth, gridHeight];      //gives 'cells' height and width
+        cells = new SpriteRenderer[gridWidth, gridHeight];      //gives 'cells' height and width
         GameObject boardObject = Board;             //Uses unity to get the board gameobject
 
         //Loops through all the cells in the grid
@@ -63,17 +70,16 @@ public class BoardManager : MonoBehaviour
                 cell.GetComponent<SpriteRenderer>().sprite = newSprite;     //Renders sprites
                 cell.transform.Translate(0, 0, -1);
                 cell.GetComponent<CellManager>().render = cell.GetComponent<SpriteRenderer>();
-                cells[x, y] = cell;     //Adds gameobject to the array
+                cells[x, y] = cell.GetComponent<SpriteRenderer>();     //Adds gameobject to the array
             }
         }
 
         //Positions board
         boardObject.transform.Translate(0, 1, 0);
-        ClearAllMatches();
     }
 
     //Finds empty cells and triggers ShiftCellsDown
-    public IEnumerator FindNullCells()
+    /*public IEnumerator FindNullCells()
     {
         for (int x = 0; x < gridHeight; x++)
         {
@@ -120,7 +126,7 @@ public class BoardManager : MonoBehaviour
         IsShifting = false;
     }
 
-    /*private Sprite GetNewSprite(int x, int y)
+    private Sprite GetNewSprite(int x, int y)
     {
         List<Sprite> possibleQuarks = new List<Sprite>();
         possibleQuarks.AddRange(quarks);
@@ -141,7 +147,7 @@ public class BoardManager : MonoBehaviour
         return possibleQuarks[Random.Range(0, possibleQuarks.Count)];
     }*/
 
-
+    #region Utility Functions
     void setHexSizes()
     {
         hexWidth = Hex.GetComponent<Renderer>().bounds.size.x;
@@ -170,24 +176,28 @@ public class BoardManager : MonoBehaviour
         float y = initPos.y - gridPos.y * hexHeight * yoffset;
         return new Vector2(x, y);
     }
+    #endregion
 
     //Checks all cells for a match
-    public IEnumerator ClearAllMatches()
+    public void ClearAllMatches()
     {
-        for (int x = 0; x < gridWidth; x++)
+        for (int y = 0; y < rows.Count; y++)
         {
-            for (int y = 0; y < gridHeight; y++)
-            {
-                if(x != 0)
-                {
-                    if(cells[x, y-1].GetComponent<SpriteRenderer>().sprite == null)
-                    {
-                        cells[x, y].GetComponent<SpriteRenderer>().sprite = cells[x, y - 1].GetComponent<SpriteRenderer>().sprite;
-                        yield return new WaitForSeconds(0.3f);
-                    }
-                }
-            }
-
+            while (RowShift(rows[y])) { }
         }
+    }
+
+    public bool RowShift(SpriteRenderer[] QuarkRow)
+    {
+        for (int i = 0; i < QuarkRow.Length-1; i++)
+        {
+            if(QuarkRow[i].sprite == null && QuarkRow[i+1].sprite != null)
+            {
+                QuarkRow[i].sprite = QuarkRow[i + 1].sprite;
+                QuarkRow[i + 1].sprite = null;
+                return true;
+            }
+        }
+        return false;
     }
 }
