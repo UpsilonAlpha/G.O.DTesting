@@ -184,9 +184,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e35eebbb9aacd1a47ba823f18c72482a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  render: {fileID: 0}
   protons: 0
   neutrons: 0
+  render: {fileID: 0}
 --- !u!212 &980116525
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -453,6 +453,7 @@ MonoBehaviour:
   Turn: 0
   gridWidth: 5
   gridHeight: 5
+  delay: 0.1
 --- !u!4 &1824872991
 Transform:
   m_ObjectHideFlags: 0

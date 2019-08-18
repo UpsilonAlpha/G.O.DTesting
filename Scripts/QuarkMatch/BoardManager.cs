@@ -4,6 +4,7 @@ using System.Collections;
 
 public class BoardManager : MonoBehaviour
 {
+    #region Public Variables
     public static BoardManager instance = null;
 
     public GameObject Hex;  //These are the white hexagons in the background. Good for possible textures and anims in the future
@@ -15,11 +16,48 @@ public class BoardManager : MonoBehaviour
     public int Turn = 0; //Turn counter
     public int gridWidth;   //Size of the board
     public int gridHeight;
+    public float delay;
 
     public SpriteRenderer[,] cells;    //2D array of cell objects
+    #endregion
+
+    #region Utility Functions
+    void setHexSizes()
+    {
+        hexWidth = Hex.GetComponent<Renderer>().bounds.size.x;
+        hexHeight = Hex.GetComponent<Renderer>().bounds.size.y;
+    }
+
+    //Finds the initial position of sprites
+    Vector2 calcInitPos()
+    {
+        Vector2 initPos;
+        initPos = new Vector2(-hexWidth * gridWidth / 2f + hexWidth / 2, gridHeight / 2f * hexHeight / 2);
+        return initPos;
+    }
+
+    //Positions board objects
+    public Vector2 calcWorldCoord(Vector2 gridPos)
+    {
+        Vector2 initPos = calcInitPos();
+        float xoffset = 0;
+        float yoffset = 0;
+        if (gridPos.y % 2 != 0)
+            xoffset = hexWidth / 2;
+
+        float x = initPos.x + xoffset + gridPos.x * hexWidth;
+        yoffset = 0.75f;
+        float y = initPos.y - gridPos.y * hexHeight * yoffset;
+        return new Vector2(x, y);
+    }
+    #endregion
+
+    #region Private Variables
     private float hexWidth;     //Dimensions of background hexes
     private float hexHeight;
+    private bool[] moveFin = new bool[5] { true, true, true, true, true };
     private List<SpriteRenderer[]> rows = new List<SpriteRenderer[]>();
+    #endregion
 
     //Calls game creation functions
     private void Awake()
@@ -35,11 +73,12 @@ public class BoardManager : MonoBehaviour
         }
         setHexSizes();
         createBoard();
-        rows.Add(new SpriteRenderer[] { cells[0, 0], cells[0, 1], cells[0, 2], cells[0, 3], cells[0, 4], });
-        rows.Add(new SpriteRenderer[] { cells[1, 0], cells[1, 1], cells[1, 2], cells[1, 3], cells[1, 4], });
-        rows.Add(new SpriteRenderer[] { cells[2, 0], cells[2, 1], cells[2, 2], cells[2, 3], cells[2, 4], });
-        rows.Add(new SpriteRenderer[] { cells[3, 0], cells[3, 1], cells[3, 2], cells[3, 3], cells[3, 4], });
-        rows.Add(new SpriteRenderer[] { cells[4, 0], cells[4, 1], cells[4, 2], cells[4, 3], cells[4, 4], });
+
+        rows.Add(new SpriteRenderer[] { cells[0, 0], cells[1, 0], cells[2, 0], cells[3, 0], cells[4, 0], });
+        rows.Add(new SpriteRenderer[] { cells[0, 1], cells[1, 1], cells[2, 1], cells[3, 1], cells[4, 1], });
+        rows.Add(new SpriteRenderer[] { cells[0, 2], cells[1, 2], cells[2, 2], cells[3, 2], cells[4, 2], });
+        rows.Add(new SpriteRenderer[] { cells[0, 3], cells[1, 3], cells[2, 3], cells[3, 3], cells[4, 3], });
+        rows.Add(new SpriteRenderer[] { cells[0, 4], cells[1, 4], cells[2, 4], cells[3, 4], cells[4, 4], });
 
     }
 
@@ -78,10 +117,99 @@ public class BoardManager : MonoBehaviour
         boardObject.transform.Translate(0, 1, 0);
     }
 
-    //Finds empty cells and triggers ShiftCellsDown
-    /*public IEnumerator FindNullCells()
+    //Clears all matches on the board
+    public void ClearAllMatches()
     {
-        for (int x = 0; x < gridHeight; x++)
+        for (int y = 0; y < gridHeight; y+=2)
+        {
+            for (int x = 0; x < gridWidth; x+=2)
+            {
+                cells[x, y].GetComponent<CellManager>().ClearMatch();
+            }
+        }
+    }
+
+
+    //Makes cells fall
+    #region Shift Functions
+    //Runs RowShiftCo on every cell and waits for it to finish
+    public IEnumerator ShiftAlLeft()
+    {
+        //Waits to show user a match was found
+        yield return new WaitForSeconds(0.3f);
+        for (int i = 0; i < rows.Count; i++)        //Loops through all the cells calling the RowShift function
+        {
+            for (i = 0; i < rows.Count; i++)
+            {
+                StartCoroutine(RowShiftCo(rows[i], i));
+            }
+        }
+        while (!(moveFin[0] && moveFin[1] && moveFin[2] && moveFin[3] && moveFin[4]))   //Repeats until all the rows have fallen
+            yield return null;
+        StopAllCoroutines();
+    }
+
+    //Adds a delay to the Rowhsift function and runs it until all sprites have fallen
+    public IEnumerator RowShiftCo(SpriteRenderer[] line, int index)
+    {
+        moveFin[index] = false;
+        while (RowShift(line))
+        {
+            yield return new WaitForSeconds(delay);
+        }
+        moveFin[index] = true;
+    }
+
+    //Loops through the row and swaps null sprites to the top
+    public bool RowShift(SpriteRenderer[] QuarkRow)
+    {
+        for (int i = 0; i < QuarkRow.Length-1; i++)
+        {
+            //Creates new sprites at the right to fall down
+            if(QuarkRow[QuarkRow.Length - 1].sprite == null)
+            {
+                QuarkRow[QuarkRow.Length - 1].sprite = quarks[Random.Range(0, quarks.Count)];
+            }
+
+            //Checks for a space below the sprite
+            if(QuarkRow[i].sprite == null && QuarkRow[i+1].sprite != null)
+            {
+                //Swaps the falling sprite with the empty space
+                QuarkRow[i].sprite = QuarkRow[i + 1].sprite;
+                QuarkRow[i + 1].sprite = null;
+                return true;
+            }
+        }
+        return false;
+    }
+    #endregion
+
+    /*
+    
+    private Sprite GetNewSprite(int x, int y)
+    {
+        List<Sprite> possibleQuarks = new List<Sprite>();
+        possibleQuarks.AddRange(quarks);
+
+        if (x > 0)
+        {
+            possibleQuarks.Remove(cells[x - 1, y].GetComponent<SpriteRenderer>().sprite);
+        }
+        if (x < gridHeight - 1)
+        {
+            possibleQuarks.Remove(cells[x + 1, y].GetComponent<SpriteRenderer>().sprite);
+        }
+        if (y > 0)
+        {
+            possibleQuarks.Remove(cells[x, y - 1].GetComponent<SpriteRenderer>().sprite);
+        }
+
+        return possibleQuarks[Random.Range(0, possibleQuarks.Count)];
+    }
+
+    public IEnumerator FindNullCells()
+    {
+        for (int x = 0; x < gridWidth; x++)
         {
             for (int y = 0; y < gridWidth; y++)
             {
@@ -94,7 +222,7 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    public IEnumerator ShiftCellsDown(int x, int yStart, float shiftDelay = 1f)
+    public IEnumerator ShiftCellsDown(int y, int xStart, float shiftDelay = 1f)
     {
         IsShifting = true;
         //Creates a list to store the falling cells in the row
@@ -102,9 +230,9 @@ public class BoardManager : MonoBehaviour
         int nullCount = 0;
 
         //Loops through row finding number of spaces
-        for (int y = yStart; y < gridWidth; y++)
+        for (int x = xStart; x < gridWidth; x++)
         {
-            SpriteRenderer render = cells[y, x].GetComponent<SpriteRenderer>();
+            SpriteRenderer render = cells[x, y].GetComponent<SpriteRenderer>();
             if (render.sprite == null)
             {
                 nullCount++;
@@ -125,79 +253,5 @@ public class BoardManager : MonoBehaviour
         }
         IsShifting = false;
     }
-
-    private Sprite GetNewSprite(int x, int y)
-    {
-        List<Sprite> possibleQuarks = new List<Sprite>();
-        possibleQuarks.AddRange(quarks);
-
-        if (x > 0)
-        {
-            possibleQuarks.Remove(cells[x - 1, y].GetComponent<SpriteRenderer>().sprite);
-        }
-        if (x < gridHeight - 1)
-        {
-            possibleQuarks.Remove(cells[x + 1, y].GetComponent<SpriteRenderer>().sprite);
-        }
-        if (y > 0)
-        {
-            possibleQuarks.Remove(cells[x, y - 1].GetComponent<SpriteRenderer>().sprite);
-        }
-
-        return possibleQuarks[Random.Range(0, possibleQuarks.Count)];
-    }*/
-
-    #region Utility Functions
-    void setHexSizes()
-    {
-        hexWidth = Hex.GetComponent<Renderer>().bounds.size.x;
-        hexHeight = Hex.GetComponent<Renderer>().bounds.size.y;
-    }
-
-    //Finds the initial position of sprites
-    Vector2 calcInitPos()
-    {
-        Vector2 initPos;
-        initPos = new Vector2(-hexWidth * gridWidth / 2f + hexWidth / 2, gridHeight / 2f * hexHeight / 2);
-        return initPos;
-    }
-
-    //Positions board objects
-    public Vector2 calcWorldCoord(Vector2 gridPos)
-    {
-        Vector2 initPos = calcInitPos();
-        float xoffset = 0;
-        float yoffset = 0;
-        if (gridPos.y % 2 != 0)
-            xoffset = hexWidth / 2;
-
-        float x = initPos.x + xoffset + gridPos.x * hexWidth;
-        yoffset = 0.75f;
-        float y = initPos.y - gridPos.y * hexHeight * yoffset;
-        return new Vector2(x, y);
-    }
-    #endregion
-
-    //Checks all cells for a match
-    public void ClearAllMatches()
-    {
-        for (int y = 0; y < rows.Count; y++)
-        {
-            while (RowShift(rows[y])) { }
-        }
-    }
-
-    public bool RowShift(SpriteRenderer[] QuarkRow)
-    {
-        for (int i = 0; i < QuarkRow.Length-1; i++)
-        {
-            if(QuarkRow[i].sprite == null && QuarkRow[i+1].sprite != null)
-            {
-                QuarkRow[i].sprite = QuarkRow[i + 1].sprite;
-                QuarkRow[i + 1].sprite = null;
-                return true;
-            }
-        }
-        return false;
-    }
+    */
 }

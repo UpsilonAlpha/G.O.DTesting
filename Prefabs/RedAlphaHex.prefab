@@ -110,6 +110,7 @@ GameObject:
   - component: {fileID: 4737173698439990907}
   - component: {fileID: 4737173698439990908}
   - component: {fileID: 664485538}
+  - component: {fileID: 5822506412814019773}
   m_Layer: 0
   m_Name: RedAlphaHex
   m_TagString: Untagged
@@ -211,3 +212,15 @@ PolygonCollider2D:
       - {x: -1.6697638, y: -2.7012653}
       - {x: 1.6476878, y: -2.7135563}
       - {x: 3.3129475, y: -0.0035581589}
+--- !u!114 &5822506412814019773
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4737173698439990910}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9bd934fa18494d94f9c37af38ebf9270, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

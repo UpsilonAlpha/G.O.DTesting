@@ -5,7 +5,8 @@ using System.Linq;
 using UnityEngine;
 
 //OKAY COCKSUCKER, DO A WHOLE BOARD MATCH CHECK FUNCTION BY RUNNING CHECKLOOP ON EVERY SECOND CELL ON EVERY SECOND ROW SO X+2 and Y+2
-//ALSO YOU HAVE TO DO THE DESTROY AND DROP THING SIDEWAYS, GOODLUCK YOU BASTARD
+
+//MAKE STUFF FALL IN THE DIRECTION THE PLAYER CLICKS!!!
 
 public class CellManager : MonoBehaviour
 {
@@ -115,8 +116,10 @@ public class CellManager : MonoBehaviour
                     //Swaps sprites with the previously selected cell
                     SwapSprite(previousSelected.render);
                     //Checks both cells that were swapped
-                    previousSelected.ClearMatch();
-                    ClearMatch();
+                    if(!previousSelected.ClearMatch())
+                        ClearMatch();
+                    StartCoroutine(BoardManager.instance.ShiftAlLeft());
+                    
 
                     previousSelected.Deselect();
                 }
