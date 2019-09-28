@@ -94,8 +94,8 @@ LightmapSettings:
     m_PVRFilteringAtrousPositionSigmaDirect: 0.5
     m_PVRFilteringAtrousPositionSigmaIndirect: 2
     m_PVRFilteringAtrousPositionSigmaAO: 1
-    m_ShowResolutionOverlay: 1
     m_ExportTrainingData: 0
+    m_TrainingDataDestination: TrainingData
   m_LightingDataAsset: {fileID: 0}
   m_UseShadowmask: 1
 --- !u!196 &4
@@ -212,6 +212,7 @@ SpriteRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -291,6 +292,7 @@ SpriteRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -443,13 +445,30 @@ MonoBehaviour:
   Hex: {fileID: 1380997878}
   Cell: {fileID: 980116522}
   Board: {fileID: 1824872989}
-  quarks:
-  - {fileID: 21300000, guid: b8f35fe5f24f1c24680382f21dbdd7f5, type: 3}
+  genOne:
+  - {fileID: 21300000, guid: d30575096d9079849886cb404bba805c, type: 3}
   - {fileID: 21300000, guid: 7c80d3b2861eb2747b906eacfe848797, type: 3}
-  - {fileID: 21300000, guid: 469a3a04443358b4c87a250a6757e2a5, type: 3}
   - {fileID: 21300000, guid: 59c3cc0cee09d504681c6bccec4dad5a, type: 3}
   - {fileID: 21300000, guid: d407b52ba0d77c244af476bffee4d1c6, type: 3}
-  - {fileID: 21300000, guid: d30575096d9079849886cb404bba805c, type: 3}
+  - {fileID: 21300000, guid: b8f35fe5f24f1c24680382f21dbdd7f5, type: 3}
+  - {fileID: 21300000, guid: 469a3a04443358b4c87a250a6757e2a5, type: 3}
+  genTwo:
+  - {fileID: 21300000, guid: e21b9c5e044a15846913b2c7e89fc087, type: 3}
+  - {fileID: 21300000, guid: 83f51840ae6cbc341a45e9eb69065044, type: 3}
+  - {fileID: 21300000, guid: 0ad81f24b2dfb9f4180b5cf0c962a429, type: 3}
+  - {fileID: 21300000, guid: 53748407e99318d4fa1c55c62e92bbdb, type: 3}
+  - {fileID: 21300000, guid: b55ce998f63fc0741b4668e96b5fe3af, type: 3}
+  - {fileID: 21300000, guid: 90316479438c9a245adbe8b6a72ffe0d, type: 3}
+  - {fileID: 21300000, guid: 4c05b7b94ab894944a89ee884304b87d, type: 3}
+  - {fileID: 21300000, guid: a9839e31c395d1e46b6a5c392717329a, type: 3}
+  - {fileID: 21300000, guid: 8dccb927446527146915e5272ec4e868, type: 3}
+  antiGenOne:
+  - {fileID: 21300000, guid: 727e166770be77b42b479e21d9bdec78, type: 3}
+  - {fileID: 21300000, guid: 4b117121859ded14394cd37591e0083d, type: 3}
+  - {fileID: 21300000, guid: f5d369596f1ff014fa00f98b896555b3, type: 3}
+  - {fileID: 21300000, guid: 94c1ce9f640b6e24f861b636c9c668ee, type: 3}
+  - {fileID: 21300000, guid: 3424ecc32baeeeb4e9afd7c72da4be20, type: 3}
+  - {fileID: 21300000, guid: d421589d26e877d4fab34ec8e494a1ca, type: 3}
   Turn: 0
   gridWidth: 5
   gridHeight: 5

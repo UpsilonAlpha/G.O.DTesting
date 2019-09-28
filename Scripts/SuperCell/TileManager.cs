@@ -6,11 +6,11 @@ using UnityEngine.EventSystems;
 public class TileManager : MonoBehaviour
 {
     public Color hoverColor;
-    SpriteRenderer render;
+    public SpriteRenderer render;
     MapManager MM;
     public GameObject organelle;
     private Vector2[] adjacentDirections = new Vector2[] { (Vector3)MathHelpers.DegreeToVector2(-120), Vector2.left , (Vector3)MathHelpers.DegreeToVector2(120) , (Vector3)MathHelpers.DegreeToVector2(60), Vector2.right, (Vector3)MathHelpers.DegreeToVector2(-60), new Vector2(0, 0)};
-    public float size = 1.5f;
+    public float size;
 
     private void Start()
     {
@@ -20,38 +20,57 @@ public class TileManager : MonoBehaviour
 
     private void OnMouseEnter()
     {
-        for (int i = 0; i < getNeighbours(size).Count; i++)
+        if (organelle == null)
         {
-            Debug.Log(ZoneColor(i).ToString());
+            if (MM.CanBuild)
+            {
+                size = MM.GettoBuild().size;
+                getNeighbours(size, hoverColor);
+                ZoneCheck();
+            }
+            else
+                getNeighbours(size, Color.gray);
         }
+        else
+            ZoneCheck();
     }
+
     private void OnMouseExit()
     {
         for (int i = 0; i < adjacentDirections.Length; i++)
         {
-            getNeighbours(size)[i].GetComponent<TileManager>().render.color = Color.black;
+            if (getNeighbour(adjacentDirections[i] * new Vector2(size, size)).GetComponent<TileManager>().organelle != null)
+            {
+                getNeighbour(adjacentDirections[i] * new Vector2(size, size)).GetComponent<TileManager>().render.color = new Color32(0, 200, 100, 255);
+            }
+            else
+                getNeighbour(adjacentDirections[i] * new Vector2(size, size)).GetComponent<TileManager>().render.color = Color.black;
+
         }
     }
 
-    public bool ZoneColor(int i)
+    public bool ZoneCheck()
     {
-        if (getNeighbours(size)[i].GetComponent<TileManager>().organelle != null)
+        for (int i = 0; i < getNeighbours(size, Color.red).Count; i++)
         {
-            getNeighbour(adjacentDirections[i] * new Vector2(size, size)).GetComponent<TileManager>().render.color = Color.red;
-            return false;
+            if (getNeighbours(size, Color.red)[i].GetComponent<TileManager>().organelle != null)
+            {
+                return false;
+            }
         }
-        getNeighbours(size)[i].GetComponent<TileManager>().render.color = hoverColor;
-        return true;        
+        getNeighbours(size, hoverColor);
+        return true;
     }
 
-    public List<GameObject> getNeighbours(float size)
+    public List<GameObject> getNeighbours(float size, Color color)
     {
         List<GameObject> zone = new List<GameObject>();
 
         for (int i = 0; i < adjacentDirections.Length; i++)
         {
-            if (getNeighbour(adjacentDirections[i] * new Vector2(this.size, this.size)) != null)
+            if (getNeighbour(adjacentDirections[i] * new Vector2(size, size)) != null)
             {
+                getNeighbour(adjacentDirections[i] * new Vector2(size, size)).GetComponent<TileManager>().render.color = color;
                 zone.Add(getNeighbour(adjacentDirections[i] * new Vector2(size, size)));
             }
 
@@ -78,6 +97,9 @@ public class TileManager : MonoBehaviour
 
         if (!MM.CanBuild)
             return;
+        if (!ZoneCheck())
+            return;
         MM.BuildOn(this);
     }
+
 }

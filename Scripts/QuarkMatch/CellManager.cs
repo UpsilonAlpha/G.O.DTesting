@@ -23,7 +23,11 @@ public class CellManager : MonoBehaviour
     private SpriteRenderer sprite2;   //Renderer of second neighbour quark sprite
 
     List<char> flavours = new List<char>(); //A list of quark flavours in the detected quarks
+    List<char> colors = new List<char>();   //A list of the colours of detected quarks
     private int charge = 0; //Total charge of combined quarks in the detected quarks
+
+    bool baryon = false;    //Helps check if the match is matter or antimatter
+    bool antibaryon = false;
     #endregion
 
     #region Public Variables
@@ -85,11 +89,30 @@ public class CellManager : MonoBehaviour
         Sprite tempSprite = render2.sprite;
         render2.sprite = render.sprite;
         render.sprite = tempSprite;
+        if(render.sprite.name[render.sprite.name.Length -1] == 'm')
+        {
+            render.sprite = BoardManager.instance.genTwo[4];
+        }
+        if (render.sprite.name[render.sprite.name.Length - 1] == 'e')
+        {
+            render.sprite = BoardManager.instance.genTwo[4];
+        }
+    }
+
+    public bool Reset()
+    {
+        charge = 0;
+        flavours = new List<char>();
+        colors = new List<char>();
+        baryon = false;
+        antibaryon = false;
+        return false;
     }
     #endregion
 
     public void OnMouseDown()
     {
+
         //If you missclick or click when animations are happening, ignore it
         if (render.sprite == null || BoardManager.instance.IsShifting)
         {
@@ -181,12 +204,19 @@ public class CellManager : MonoBehaviour
         //Makes an array of the neighbour's flavours
         char[] flavourarray = { render.sprite.name[render.sprite.name.Length - 1], sprite1.sprite.name[sprite1.sprite.name.Length - 1], sprite2.sprite.name[sprite2.sprite.name.Length - 1] };
         flavours.AddRange(flavourarray);
+        char[] colorarray = { sprite1.sprite.name[0], render.sprite.name[0], sprite2.sprite.name[0] };
+        colors.AddRange(colorarray);
 
-        //Makes sure all the colors charges are different (so red green and blue)
-        if (sprite1.sprite.name[0] != render.sprite.name[0] && sprite2.sprite.name[0] != render.sprite.name[0] && sprite2.sprite.name[0] != sprite1.sprite.name[0])
+        //Makes sure all the colors charges are balanced (e.g. red green and blue)
+        if (colors.Contains('R') && colors.Contains('G') && colors.Contains('B'))
+            baryon = true;
+        if (colors.Contains('C') && colors.Contains('M') && colors.Contains('Y'))
+            antibaryon = true;
+
+        if(baryon || antibaryon)
         {
             //Checks if there is at least one of each flavour (i.e. there is at least one up or down quark in a triplet)
-            if (flavours.Contains('p') && flavours.Contains('n'))
+            if (flavours.Contains('p') && flavours.Contains('n') && (flavours.Contains('p') || flavours.Contains('n')))
             {
                 foreach (char flavour in flavours)
                 {
@@ -200,37 +230,35 @@ public class CellManager : MonoBehaviour
                 if (charge == -1)
                 {
                     //Deletes sprites and resets values
-                    neutrons++;
+                    if (baryon)
+                        neutrons++;
+                    else
+                        neutrons--;
                     sprite1.sprite = null;
                     sprite2.sprite = null;
                     render.sprite = null;
                     BoardManager.instance.IsShifting = true;
-                    charge = 0;
-                    flavours = new List<char>();
+                    Reset();
                     return true;
                 }
                 if (charge == 1)
                 {
-                    protons++;
+                    if (baryon)
+                        protons++;
+                    else
+                        protons--;
                     sprite1.sprite = null;
                     sprite2.sprite = null;
                     render.sprite = null;
                     BoardManager.instance.IsShifting = true;
-                    charge = 0;
-                    flavours = new List<char>();
+                    Reset();
                     return true;
                 }
-                charge = 0;
-                flavours = new List<char>();
-                return false;
+                return Reset();
             }
-            charge = 0;
-            flavours = new List<char>();
-            return false;
+            return Reset();
         }
-        charge = 0;
-        flavours = new List<char>();
-        return false;
+        return Reset();
     }
 
 
