@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -28,12 +27,24 @@ public class CellManager : MonoBehaviour
 
     bool baryon = false;    //Helps check if the match is matter or antimatter
     bool antibaryon = false;
+    private BoardManager bm = BoardManager.instance;
+    private Quark quark;
     #endregion
 
     #region Public Variables
     public int protons;     //Number of protons matched
     public int neutrons;    //Number of neutrons matched
     public SpriteRenderer render;       //SpriteRenderer of current cell
+    public Sprite sprite;
+    public Quark Quark
+    {
+        get { return quark; }
+        set
+        {
+            quark = value;
+            AssignQuark();
+        }
+    }
     #endregion
 
     #region Utility Functions
@@ -89,13 +100,13 @@ public class CellManager : MonoBehaviour
         Sprite tempSprite = render2.sprite;
         render2.sprite = render.sprite;
         render.sprite = tempSprite;
-        if(render.sprite.name[render.sprite.name.Length -1] == 'm')
+        if (quark.Name[quark.Name.Length -1] == 'm')
         {
-            render.sprite = BoardManager.instance.genTwo[4];
+            quark = bm.genTwo[4];
         }
-        if (render.sprite.name[render.sprite.name.Length - 1] == 'e')
+        if (quark.Name[quark.Name.Length - 1] == 'e')
         {
-            render.sprite = BoardManager.instance.genTwo[4];
+            quark = bm.genTwo[4];
         }
     }
 
@@ -139,10 +150,10 @@ public class CellManager : MonoBehaviour
                     //Swaps sprites with the previously selected cell
                     SwapSprite(previousSelected.render);
                     //Checks both cells that were swapped
-                    if(!previousSelected.ClearMatch())
+                    if (!previousSelected.ClearMatch())
                         ClearMatch();
                     StartCoroutine(BoardManager.instance.ShiftAlLeft());
-                    
+
 
                     previousSelected.Deselect();
                 }
@@ -200,7 +211,7 @@ public class CellManager : MonoBehaviour
     }
 
     public bool MatCheck(SpriteRenderer sprite1, SpriteRenderer sprite2)
-    {     
+    {
         //Makes an array of the neighbour's flavours
         char[] flavourarray = { render.sprite.name[render.sprite.name.Length - 1], sprite1.sprite.name[sprite1.sprite.name.Length - 1], sprite2.sprite.name[sprite2.sprite.name.Length - 1] };
         flavours.AddRange(flavourarray);
@@ -213,7 +224,7 @@ public class CellManager : MonoBehaviour
         if (colors.Contains('C') && colors.Contains('M') && colors.Contains('Y'))
             antibaryon = true;
 
-        if(baryon || antibaryon)
+        if (baryon || antibaryon)
         {
             //Checks if there is at least one of each flavour (i.e. there is at least one up or down quark in a triplet)
             if (flavours.Contains('p') && flavours.Contains('n') && (flavours.Contains('p') || flavours.Contains('n')))
@@ -261,6 +272,18 @@ public class CellManager : MonoBehaviour
         return Reset();
     }
 
+    public void AssignQuark()
+    {
+        int random = Random.Range(1, 8);
+        if (random <= 3)
+            quark = bm.genOneAnti[Random.Range(0, bm.genOneAnti.Count)];
+        else if (random == 4)
+            quark = bm.genTwo[Random.Range(0, bm.genTwo.Count)];
+        else
+            quark = bm.genTwo[Random.Range(0, bm.genTwo.Count)];
 
-
+        render = GetComponent<SpriteRenderer>();
+        render.sprite = sprite;
+        render.color = quark.Color;
+    }
 }

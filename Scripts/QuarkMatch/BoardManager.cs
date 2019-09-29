@@ -1,7 +1,21 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
-using Assets.Scripts.QuarkMatch;
+
+public class Quark
+{
+    public string Name;
+    public string Flavor;
+    public Color Color;
+
+    public Quark(string name, Color color, string flavor)
+    {
+        Name = name;
+        Flavor = flavor;
+        Color = color;
+    }
+}
+
 
 public class BoardManager : MonoBehaviour
 {
@@ -11,15 +25,43 @@ public class BoardManager : MonoBehaviour
     public GameObject Hex;  //These are the white hexagons in the background. Good for possible textures and anims in the future
     public GameObject Cell; //This is the actual quark sprite and collider
     public GameObject Board;    //Parent of everything
-    public List<Sprite> genOne = new List<Sprite>();    //Lists of quark sprites
-    public List<Sprite> genTwo = new List<Sprite>();
-    public List<Sprite> antiGenOne = new List<Sprite>();
 
     public bool IsShifting { get; set; }     //Variable that stops input during the 'fall' animation
     public int Turn = 0; //Turn counter
     public int gridWidth;   //Size of the board
     public int gridHeight;
     public float delay;
+
+    public List<Quark> genOne = new List<Quark>()
+    {   new Quark("RedUp", Color.red, "u"),
+        new Quark("GreenUp", Color.green, "u"),
+        new Quark("BlueUp", Color.blue, "u"),
+        new Quark("RedDown", Color.red, "d"),
+        new Quark("GreenDown", Color.green, "d"),
+        new Quark("BlueDown", Color.blue, "d")
+    };
+    public List<Quark> genTwo = new List<Quark>()
+    {   new Quark("RedStrange", Color.red, "s"),
+        new Quark("GreenStrange", Color.green, "s"),
+        new Quark("BlueStrange", Color.blue, "s"),
+        new Quark("RedCharm", Color.red, "c"),
+        new Quark("GreenCharm", Color.green, "c"),
+        new Quark("BlueCharm", Color.blue, "c"),
+        new Quark("CyanStrange", Color.cyan, "s̄"),
+        new Quark("MagentaStrange", Color.magenta, "s̄"),
+        new Quark("YellowStrange", Color.yellow, "s̄"),
+        new Quark("CyanCharm", Color.cyan, "c̄"),
+        new Quark("MagentaCharm", Color.magenta, "c̄"),
+        new Quark("YellowCharm", Color.yellow, "c̄")
+    };
+    public List<Quark> genOneAnti = new List<Quark>()
+    {   new Quark("CyanUp", Color.cyan, "ū"),
+        new Quark("MagentaUp", Color.magenta, "ū"),
+        new Quark("YellowUp", Color.yellow, "ū"),
+        new Quark("CyanDown", Color.cyan, "d̄"),
+        new Quark("MagentaDown", Color.magenta, "d̄"),
+        new Quark("YellowDown", Color.yellow, "d̄")
+    };
 
     public SpriteRenderer[,] cells;    //2D array of cell objects
     #endregion
@@ -60,7 +102,6 @@ public class BoardManager : MonoBehaviour
     private float hexHeight;
     private bool[] moveFin = new bool[5] { true, true, true, true, true };
     private List<SpriteRenderer[]> rows = new List<SpriteRenderer[]>();
-    Quark quark = new Quark("Strange", "Red", instance.genTwo[3]);
     #endregion
 
     //Calls game creation functions
@@ -107,22 +148,13 @@ public class BoardManager : MonoBehaviour
 
                 //Spawns in sprites for the quarks
                 GameObject cell = (GameObject)Instantiate(Cell);
-                Sprite newSprite;
-                int random = Random.Range(1, 6);
-                if (random <= 2)
-                    newSprite = antiGenOne[Random.Range(0, antiGenOne.Count)];
-                else if (random == 3)
-                    newSprite = genTwo[Random.Range(0, genTwo.Count)];
-                else
-                    newSprite = genOne[Random.Range(0, genOne.Count)];
-
-                //Gets a random quark sprite
+                CellManager manager = cell.GetComponent<CellManager>();
+                manager.AssignQuark();
                 cell.transform.position = calcWorldCoord(gridPos);      //Positions quark sprites
                 cell.transform.parent = boardObject.transform;
-                cell.GetComponent<SpriteRenderer>().sprite = newSprite;     //Renders sprites
+
                 cell.transform.Translate(0, 0, -1);
-                cell.GetComponent<CellManager>().render = cell.GetComponent<SpriteRenderer>();
-                cells[x, y] = cell.GetComponent<SpriteRenderer>();     //Adds gameobject to the array
+                cells[x, y] = manager.render;     //Adds gameobject to the array
             }
         }
 
@@ -135,9 +167,9 @@ public class BoardManager : MonoBehaviour
     public IEnumerator ClearAllMatches()
     {
         yield return new WaitForEndOfFrame();
-        for (int y = 0; y < gridHeight; y+=2)
+        for (int y = 0; y < gridHeight; y += 2)
         {
-            for (int x = 0; x < gridWidth; x+=2)
+            for (int x = 0; x < gridWidth; x += 2)
             {
                 cells[x, y].GetComponent<CellManager>().ClearMatch();
             }
@@ -179,16 +211,16 @@ public class BoardManager : MonoBehaviour
     //Loops through the row and swaps null sprites to the top
     public bool RowShift(SpriteRenderer[] QuarkRow)
     {
-        for (int i = 0; i < QuarkRow.Length-1; i++)
+        for (int i = 0; i < QuarkRow.Length - 1; i++)
         {
             //Creates new sprites at the right to fall down
-            if(QuarkRow[QuarkRow.Length - 1].sprite == null)
+            if (QuarkRow[QuarkRow.Length - 1].sprite == null)
             {
-                QuarkRow[QuarkRow.Length - 1].sprite = genOne[Random.Range(0, genOne.Count)];
+                //QuarkRow[QuarkRow.Length - 1].sprite = genOne[Random.Range(0, genOne.Count)];
             }
 
             //Checks for a space below the sprite
-            if(QuarkRow[i].sprite == null && QuarkRow[i+1].sprite != null)
+            if (QuarkRow[i].sprite == null && QuarkRow[i + 1].sprite != null)
             {
                 //Swaps the falling sprite with the empty space
                 QuarkRow[i].sprite = QuarkRow[i + 1].sprite;
@@ -206,7 +238,6 @@ public class BoardManager : MonoBehaviour
     {
         List<Sprite> possibleQuarks = new List<Sprite>();
         possibleQuarks.AddRange(quarks);
-
         if (x > 0)
         {
             possibleQuarks.Remove(cells[x - 1, y].GetComponent<SpriteRenderer>().sprite);
@@ -219,10 +250,8 @@ public class BoardManager : MonoBehaviour
         {
             possibleQuarks.Remove(cells[x, y - 1].GetComponent<SpriteRenderer>().sprite);
         }
-
         return possibleQuarks[Random.Range(0, possibleQuarks.Count)];
     }
-
     public IEnumerator FindNullCells()
     {
         for (int x = 0; x < gridWidth; x++)
@@ -237,14 +266,12 @@ public class BoardManager : MonoBehaviour
             }
         }
     }
-
     public IEnumerator ShiftCellsDown(int y, int xStart, float shiftDelay = 1f)
     {
         IsShifting = true;
         //Creates a list to store the falling cells in the row
         List<SpriteRenderer> renders = new List<SpriteRenderer>();
         int nullCount = 0;
-
         //Loops through row finding number of spaces
         for (int x = xStart; x < gridWidth; x++)
         {
@@ -255,7 +282,6 @@ public class BoardManager : MonoBehaviour
             }
             renders.Add(render);
         }
-
         //Loops through each space
         for (int i = 0; i < nullCount; i++)
         {

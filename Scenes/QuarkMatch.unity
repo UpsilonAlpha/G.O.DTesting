@@ -187,6 +187,7 @@ MonoBehaviour:
   protons: 0
   neutrons: 0
   render: {fileID: 0}
+  sprite: {fileID: 21300000, guid: c63f4fdef8da09e4ba30152b13c2725d, type: 3}
 --- !u!212 &980116525
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -445,13 +446,6 @@ MonoBehaviour:
   Hex: {fileID: 1380997878}
   Cell: {fileID: 980116522}
   Board: {fileID: 1824872989}
-  genOne:
-  - {fileID: 21300000, guid: d30575096d9079849886cb404bba805c, type: 3}
-  - {fileID: 21300000, guid: 7c80d3b2861eb2747b906eacfe848797, type: 3}
-  - {fileID: 21300000, guid: 59c3cc0cee09d504681c6bccec4dad5a, type: 3}
-  - {fileID: 21300000, guid: d407b52ba0d77c244af476bffee4d1c6, type: 3}
-  - {fileID: 21300000, guid: b8f35fe5f24f1c24680382f21dbdd7f5, type: 3}
-  - {fileID: 21300000, guid: 469a3a04443358b4c87a250a6757e2a5, type: 3}
   genTwo:
   - {fileID: 21300000, guid: e21b9c5e044a15846913b2c7e89fc087, type: 3}
   - {fileID: 21300000, guid: 83f51840ae6cbc341a45e9eb69065044, type: 3}
