@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 //OKAY COCKSUCKER, DO A WHOLE BOARD MATCH CHECK FUNCTION BY RUNNING CHECKLOOP ON EVERY SECOND CELL ON EVERY SECOND ROW SO X+2 and Y+2
@@ -28,6 +27,8 @@ public class CellManager : MonoBehaviour
 
     bool baryon = false;    //Helps check if the match is matter or antimatter
     bool antibaryon = false;
+
+    BoardManager bm = BoardManager.instance;
     #endregion
 
     #region Public Variables
@@ -79,24 +80,96 @@ public class CellManager : MonoBehaviour
     }
 
     //Switches sprites using temporary variables
-    public void SwapSprite(SpriteRenderer render2)
+    public bool SwapSprite(SpriteRenderer render2)
     {
         if (render.sprite == render2.sprite)
         {
-            return;
+            return false;
         }
 
         Sprite tempSprite = render2.sprite;
         render2.sprite = render.sprite;
         render.sprite = tempSprite;
-        if(render.sprite.name[render.sprite.name.Length -1] == 'm')
+        string quark = render.sprite.name;
+
+        if (quark[0] == 'R' && render2.sprite.name[0] == 'C' || quark[0] == 'C' && render2.sprite.name[0] == 'R')
         {
-            render.sprite = BoardManager.instance.genTwo[4];
+            if(quark[quark.Length - 1] == render2.sprite.name[render2.sprite.name.Length - 1])
+            {
+                render2.sprite = null;
+                render.sprite = null;
+                return true;
+            }
         }
-        if (render.sprite.name[render.sprite.name.Length - 1] == 'e')
+        if (quark[0] == 'G' && render2.sprite.name[0] == 'M' || quark[0] == 'M' && render2.sprite.name[0] == 'G')
         {
-            render.sprite = BoardManager.instance.genTwo[4];
+            if (quark[quark.Length - 1] == render2.sprite.name[render2.sprite.name.Length - 1])
+            {
+                render2.sprite = null;
+                render.sprite = null;
+                return true;
+            }
         }
+        if (quark[0] == 'B' && render2.sprite.name[0] == 'Y' || quark[0] == 'Y' && render2.sprite.name[0] == 'B')
+        {
+            if (quark[quark.Length - 1] == render2.sprite.name[render2.sprite.name.Length - 1])
+            {
+                render2.sprite = null;
+                render.sprite = null;
+                return true;
+            }
+        }
+
+        if (quark[quark.Length - 1] == 'm')
+        {
+            switch (quark)
+            {
+                case "RedCharm":
+                    render.sprite = bm.genTwo[0];
+                    break;
+                case "GreenCharm":
+                    render.sprite = bm.genTwo[1];
+                    break;
+                case "BlueCharm":
+                    render.sprite = bm.genTwo[2];
+                    break;
+                case "CyanCharm":
+                    render.sprite = bm.genTwo[3];
+                    break;
+                case "MagentaCharm":
+                    render.sprite = bm.genTwo[4];
+                    break;
+                case "YellowCharm":
+                    render.sprite = bm.genTwo[5];
+                    break;
+            }
+        }
+        if (quark[quark.Length - 1] == 'e')
+        {
+            switch (quark)
+            {
+                case "RedStrange":
+                    render.sprite = bm.genOne[0];
+                    break;
+                case "GreenStrange":
+                    render.sprite = bm.genOne[1];
+                    break;
+                case "BlueStrange":
+                    render.sprite = bm.genOne[2];
+                    break;
+                case "CyanStrange":
+                    render.sprite = bm.genOneAnti[0];
+                    break;
+                case "MagentaStrange":
+                    render.sprite = bm.genOneAnti[1];
+                    break;
+                case "YellowStrange":
+                    render.sprite = bm.genOneAnti[2];
+                    break;
+            }
+        }
+
+        return false;
     }
 
     public bool Reset()
@@ -114,7 +187,7 @@ public class CellManager : MonoBehaviour
     {
 
         //If you missclick or click when animations are happening, ignore it
-        if (render.sprite == null || BoardManager.instance.IsShifting)
+        if (render.sprite == null || bm.IsShifting)
         {
             return;
         }
@@ -137,12 +210,13 @@ public class CellManager : MonoBehaviour
                 if (getNeighbours().Contains(previousSelected.gameObject))
                 {
                     //Swaps sprites with the previously selected cell
-                    SwapSprite(previousSelected.render);
-                    //Checks both cells that were swapped
-                    if(!previousSelected.ClearMatch())
-                        ClearMatch();
-                    StartCoroutine(BoardManager.instance.ShiftAlLeft());
                     
+                    //Checks both cells that were swapped
+                    if (!SwapSprite(previousSelected.render) && !previousSelected.ClearMatch())
+                        ClearMatch();
+
+                    StartCoroutine(bm.ShiftAlLeft());
+
 
                     previousSelected.Deselect();
                 }
@@ -158,7 +232,7 @@ public class CellManager : MonoBehaviour
 
     public bool ClearMatch()
     {
-        if (BoardManager.instance.IsShifting == true)
+        if (bm.IsShifting == true)
         {
             return false;
         }   //Don't match if animations are occuring
@@ -200,7 +274,7 @@ public class CellManager : MonoBehaviour
     }
 
     public bool MatCheck(SpriteRenderer sprite1, SpriteRenderer sprite2)
-    {     
+    {
         //Makes an array of the neighbour's flavours
         char[] flavourarray = { render.sprite.name[render.sprite.name.Length - 1], sprite1.sprite.name[sprite1.sprite.name.Length - 1], sprite2.sprite.name[sprite2.sprite.name.Length - 1] };
         flavours.AddRange(flavourarray);
@@ -213,7 +287,7 @@ public class CellManager : MonoBehaviour
         if (colors.Contains('C') && colors.Contains('M') && colors.Contains('Y'))
             antibaryon = true;
 
-        if(baryon || antibaryon)
+        if (baryon || antibaryon)
         {
             //Checks if there is at least one of each flavour (i.e. there is at least one up or down quark in a triplet)
             if (flavours.Contains('p') && flavours.Contains('n') && (flavours.Contains('p') || flavours.Contains('n')))
@@ -260,7 +334,4 @@ public class CellManager : MonoBehaviour
         }
         return Reset();
     }
-
-
-
 }
