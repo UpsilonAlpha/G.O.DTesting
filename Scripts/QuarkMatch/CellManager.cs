@@ -305,26 +305,26 @@ public class CellManager : MonoBehaviour
                 {
                     //Deletes sprites and resets values
                     if (baryon)
-                        neutrons++;
+                        bm.neutrons++;
                     else
-                        neutrons--;
+                        bm.neutrons--;
                     sprite1.sprite = null;
                     sprite2.sprite = null;
                     render.sprite = null;
-                    BoardManager.instance.IsShifting = true;
+                    bm.IsShifting = true;
                     Reset();
                     return true;
                 }
                 if (charge == 1)
                 {
                     if (baryon)
-                        protons++;
+                        bm.protons++;
                     else
-                        protons--;
+                        bm.protons--;
                     sprite1.sprite = null;
                     sprite2.sprite = null;
                     render.sprite = null;
-                    BoardManager.instance.IsShifting = true;
+                    bm.IsShifting = true;
                     Reset();
                     return true;
                 }

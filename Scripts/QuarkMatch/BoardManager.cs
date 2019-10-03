@@ -21,6 +21,9 @@ public class BoardManager : MonoBehaviour
     public int gridHeight;
     public float delay;
 
+    public int protons;
+    public int neutrons;
+
     public int percentageOfStrangeness;
     public int percentageOfAntimatter;
 
@@ -78,18 +81,10 @@ public class BoardManager : MonoBehaviour
             Destroy(gameObject);
         }
         setHexSizes();
-        createBoard();
-
-        rows.Add(new SpriteRenderer[] { cells[0, 0], cells[1, 0], cells[2, 0], cells[3, 0], cells[4, 0], });
-        rows.Add(new SpriteRenderer[] { cells[0, 1], cells[1, 1], cells[2, 1], cells[3, 1], cells[4, 1], });
-        rows.Add(new SpriteRenderer[] { cells[0, 2], cells[1, 2], cells[2, 2], cells[3, 2], cells[4, 2], });
-        rows.Add(new SpriteRenderer[] { cells[0, 3], cells[1, 3], cells[2, 3], cells[3, 3], cells[4, 3], });
-        rows.Add(new SpriteRenderer[] { cells[0, 4], cells[1, 4], cells[2, 4], cells[3, 4], cells[4, 4], });
-
     }
 
     //Creates board and populates with cells
-    void createBoard()
+    public void CreateBoard()
     {
         cells = new SpriteRenderer[gridWidth, gridHeight];      //gives 'cells' height and width
         GameObject boardObject = Board;             //Uses unity to get the board gameobject
@@ -108,31 +103,26 @@ public class BoardManager : MonoBehaviour
                 thisHex.transform.parent = boardObject.transform;
 
                 //Spawns in sprites for the quarks
-                GameObject cell = (GameObject)Instantiate(Cell);
-                Sprite newSprite;
-                int random = Random.Range(1, 100);
-                if (random <= percentageOfStrangeness)
-                    newSprite = genTwo[Random.Range(0, genTwo.Count)];
-                else if (random + percentageOfStrangeness <= percentageOfAntimatter + percentageOfStrangeness)
-                    newSprite = genOneAnti[Random.Range(0, genOneAnti.Count)];
-                else
-                    newSprite = genOne[Random.Range(0, genOne.Count)];
+                GameObject cell = Instantiate(Cell);
                 //Gets a random quark sprite
                 cell.transform.position = calcWorldCoord(gridPos);      //Positions quark sprites
                 cell.transform.parent = boardObject.transform;
-                cell.GetComponent<SpriteRenderer>().sprite = newSprite;     //Renders sprites
                 cell.transform.Translate(0, 0, -1);
                 cell.GetComponent<CellManager>().render = cell.GetComponent<SpriteRenderer>();
                 cells[x, y] = cell.GetComponent<SpriteRenderer>();     //Adds gameobject to the array
+                StartCoroutine(SexyFunction(cell));
             }
         }
 
         //Positions board
         boardObject.transform.Translate(0, 1, 0);
-    }
 
-    private void Start()
-    {
+        rows.Add(new SpriteRenderer[] { cells[0, 0], cells[1, 0], cells[2, 0], cells[3, 0], cells[4, 0], });
+        rows.Add(new SpriteRenderer[] { cells[0, 1], cells[1, 1], cells[2, 1], cells[3, 1], cells[4, 1], });
+        rows.Add(new SpriteRenderer[] { cells[0, 2], cells[1, 2], cells[2, 2], cells[3, 2], cells[4, 2], });
+        rows.Add(new SpriteRenderer[] { cells[0, 3], cells[1, 3], cells[2, 3], cells[3, 3], cells[4, 3], });
+        rows.Add(new SpriteRenderer[] { cells[0, 4], cells[1, 4], cells[2, 4], cells[3, 4], cells[4, 4], });
+
         ClearAllMatches();
     }
 
@@ -157,6 +147,22 @@ public class BoardManager : MonoBehaviour
 
     }
 
+    public IEnumerator SexyFunction(GameObject cell)
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            yield return new WaitForSeconds(0.1f);
+            Sprite newSprite;
+            int random = Random.Range(1, 100);
+            if (random <= percentageOfStrangeness)
+                newSprite = genTwo[Random.Range(0, genTwo.Count)];
+            else if (random + percentageOfStrangeness <= percentageOfAntimatter + percentageOfStrangeness)
+                newSprite = genOneAnti[Random.Range(0, genOneAnti.Count)];
+            else
+                newSprite = genOne[Random.Range(0, genOne.Count)];
+            cell.GetComponent<SpriteRenderer>().sprite = newSprite;     //Renders sprites
+        }
+    }
 
     //Makes cells fall
     #region Shift Functions
