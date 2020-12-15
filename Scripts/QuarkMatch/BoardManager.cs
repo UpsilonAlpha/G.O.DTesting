@@ -1,32 +1,99 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
+using UnityEngine.UI;
 
 public class BoardManager : MonoBehaviour
 {
+    #region Private Variables
+    private float hexWidth;     //Dimensions of background hexes
+    private float hexHeight;
+    private bool[] moveFin = new bool[5] { true, true, true, true, true };
+    private List<SpriteRenderer[]> rows = new List<SpriteRenderer[]>();
+    private int protons;
+    private int neutrons;
+    [SerializeField]
+    private int turn;
+    #endregion
+
     #region Public Variables
     public static BoardManager instance = null;
 
     public GameObject Hex;  //These are the white hexagons in the background. Good for possible textures and anims in the future
     public GameObject Cell; //This is the actual quark sprite and collider
     public GameObject Board;    //Parent of everything
+    public GameObject WhiteSprite;
     public List<Sprite> genOne = new List<Sprite>();    //Lists of quark sprites
     public List<Sprite> genTwo = new List<Sprite>();
+<<<<<<< Updated upstream
     public List<Sprite> genOneAnti = new List<Sprite>();
     public List<Sprite> Shapes = new List<Sprite>();
+=======
+<<<<<<< Updated upstream
+    public List<Sprite> antiGenOne = new List<Sprite>();
+=======
+    public List<Sprite> genOneAnti = new List<Sprite>();
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 
     public bool IsShifting { get; set; }     //Variable that stops input during the 'fall' animation
-    public int Turn = 0; //Turn counter
     public int gridWidth;   //Size of the board
     public int gridHeight;
     public float delay;
 
+<<<<<<< Updated upstream
     public int protons;
     public int neutrons;
 
     public int percentageOfStrangeness;
     public int percentageOfAntimatter;
 
+=======
+<<<<<<< Updated upstream
+=======
+    public int percentageOfStrangeness;
+    public int percentageOfAntimatter;
+
+    public int Protons
+    {
+        get
+        {
+            return protons;
+        }
+        set
+        {
+            protons = value;
+            SeText("ProtonCount", "PROTONS:\n" + protons.ToString());
+        }
+    }
+
+    public int Neutrons
+    {
+        get
+        {
+            return neutrons;
+        }
+        set
+        {
+            neutrons = value;
+            SeText("NeutronCount", "NEUTRONS:\n" + neutrons.ToString());
+        }
+    }
+
+    public int Turn
+    {
+        get
+        {
+            return turn;
+        }
+        set
+        {
+            turn = value;
+            SeText("TurnCount", "TURNS:\n" + turn.ToString());
+        }
+    }
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
     public SpriteRenderer[,] cells;    //2D array of cell objects
     #endregion
 
@@ -59,13 +126,11 @@ public class BoardManager : MonoBehaviour
         float y = initPos.y - gridPos.y * hexHeight * yoffset;
         return new Vector2(x, y);
     }
-    #endregion
 
-    #region Private Variables
-    private float hexWidth;     //Dimensions of background hexes
-    private float hexHeight;
-    private bool[] moveFin = new bool[5] { true, true, true, true, true };
-    private List<SpriteRenderer[]> rows = new List<SpriteRenderer[]>();
+    public void SeText(string name, string text)
+    {
+        GameObject.Find(name).GetComponent<Text>().text = text; 
+    }
     #endregion
 
     //Calls game creation functions
@@ -106,7 +171,15 @@ public class BoardManager : MonoBehaviour
                 GameObject cell = Instantiate(Cell);
                 //Gets a random quark sprite
                 cell.transform.position = calcWorldCoord(gridPos);      //Positions quark sprites
+<<<<<<< Updated upstream
                 cell.transform.parent = boardObject.transform;
+<<<<<<< Updated upstream
+=======
+                cell.GetComponent<SpriteRenderer>().sprite = newSprite;     //Renders sprites
+=======
+                cell.transform.parent = thisHex.transform;
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
                 cell.transform.Translate(0, 0, -1);
                 cell.GetComponent<CellManager>().render = cell.GetComponent<SpriteRenderer>();
                 cells[x, y] = cell.GetComponent<SpriteRenderer>();     //Adds gameobject to the array
@@ -117,13 +190,27 @@ public class BoardManager : MonoBehaviour
         //Positions board
         boardObject.transform.Translate(0, 1, 0);
 
+<<<<<<< Updated upstream
         rows.Add(new SpriteRenderer[] { cells[0, 0], cells[1, 0], cells[2, 0], cells[3, 0], cells[4, 0], });
         rows.Add(new SpriteRenderer[] { cells[0, 1], cells[1, 1], cells[2, 1], cells[3, 1], cells[4, 1], });
         rows.Add(new SpriteRenderer[] { cells[0, 2], cells[1, 2], cells[2, 2], cells[3, 2], cells[4, 2], });
         rows.Add(new SpriteRenderer[] { cells[0, 3], cells[1, 3], cells[2, 3], cells[3, 3], cells[4, 3], });
         rows.Add(new SpriteRenderer[] { cells[0, 4], cells[1, 4], cells[2, 4], cells[3, 4], cells[4, 4], });
 
+=======
+<<<<<<< Updated upstream
+    public IEnumerator BoardWipe()
+    {
+        yield return new WaitForEndOfFrame();
+>>>>>>> Stashed changes
         ClearAllMatches();
+=======
+        rows.Add(new SpriteRenderer[] { cells[0, 0], cells[1, 0], cells[2, 0], cells[3, 0], cells[4, 0], });
+        rows.Add(new SpriteRenderer[] { cells[0, 1], cells[1, 1], cells[2, 1], cells[3, 1], cells[4, 1], });
+        rows.Add(new SpriteRenderer[] { cells[0, 2], cells[1, 2], cells[2, 2], cells[3, 2], cells[4, 2], });
+        rows.Add(new SpriteRenderer[] { cells[0, 3], cells[1, 3], cells[2, 3], cells[3, 3], cells[4, 3], });
+        rows.Add(new SpriteRenderer[] { cells[0, 4], cells[1, 4], cells[2, 4], cells[3, 4], cells[4, 4], });
+>>>>>>> Stashed changes
     }
 
     //Clears all matches on the board
@@ -147,6 +234,11 @@ public class BoardManager : MonoBehaviour
 
     }
 
+<<<<<<< Updated upstream
+=======
+<<<<<<< Updated upstream
+=======
+>>>>>>> Stashed changes
     public IEnumerator SexyFunction(GameObject cell)
     {
         for (int i = 0; i < 10; i++)
@@ -162,7 +254,13 @@ public class BoardManager : MonoBehaviour
                 newSprite = genOne[Random.Range(0, genOne.Count)];
             cell.GetComponent<SpriteRenderer>().sprite = newSprite;     //Renders sprites
         }
+<<<<<<< Updated upstream
     }
+=======
+        ClearAllMatches();
+    }
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 
     //Makes cells fall
     #region Shift Functions

@@ -4,8 +4,11 @@ using UnityEngine;
 
 public class Proton : MonoBehaviour
 {
-    private void OnCollisionEnter2D(Collision2D hit)
+    Rigidbody2D rb;
+    Vector2[] dirs = {new Vector2(1,1), new Vector2(1,-1), new Vector2(-1,0), new Vector2(-1,-1), new Vector2(-1,1), new Vector2(1,0),};
+    void Awake()
     {
-        Destroy(gameObject);
+        rb = GetComponent<Rigidbody2D>();
+        //rb.velocity = dirs[Random.Range(0,6)].normalized*1;
     }
 }

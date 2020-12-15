@@ -86,6 +86,7 @@ public class Tile : MonoBehaviour
                 break;
             case 9:
                 Apply(8);
+                ElementName.color = Color.white;
                 break;
             default:
                 print("YOU DONE FUCKED UP SONNY");

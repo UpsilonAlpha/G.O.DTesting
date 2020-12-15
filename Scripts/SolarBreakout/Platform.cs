@@ -6,12 +6,12 @@ public class Platform : MonoBehaviour
 {
     public float speed;
 
-    private Vector2 platypos = new Vector2(0, -4);
 
     void Update()
     {
         float xPos = transform.position.x + Input.GetAxisRaw("Horizontal") * speed;
-        platypos = new Vector2(Mathf.Clamp(xPos, -5.3f, 5.3f), -4);
-        transform.position = platypos;
+        float yPos = transform.position.y + Input.GetAxisRaw("Vertical") * speed;
+
+        transform.position = new Vector2(xPos, yPos);
     }
 }

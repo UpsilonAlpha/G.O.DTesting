@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
-using System.Collections;
+using UnityEngine.UI;
 
 public class MapManager : MonoBehaviour
 {
@@ -9,7 +8,7 @@ public class MapManager : MonoBehaviour
     public static MapManager instance;
     public Genome genome;
     public GameObject temp;
-
+    public Text ATPText;
     private Organelle toBuild;
 
     public int mapWidth;
@@ -19,8 +18,18 @@ public class MapManager : MonoBehaviour
     public float OffsetY;
 
     public bool CanBuild { get { return toBuild != null; } }
+    private float atp;
+    private float proteins;
 
-    public float ATP;
+    public float ATP
+    {
+        get {return atp;}
+        set
+        {
+            atp = value;
+            ATPText.text = "ATP: " + atp.ToString();
+        }
+    }
     public float Proteins;
 
     private void Awake()
@@ -77,6 +86,7 @@ public class MapManager : MonoBehaviour
     {
         toBuild = organelle;
         genome.Slide();
+        Destroy(temp);
         temp = Instantiate(toBuild.prefab);
         temp.transform.localScale = temp.transform.localScale * new Vector2(0.3f, 0.3f);
     }

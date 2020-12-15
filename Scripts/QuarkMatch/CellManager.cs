@@ -3,12 +3,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+<<<<<<< Updated upstream
 //OKAY COCKSUCKER, DO A WHOLE BOARD MATCH CHECK FUNCTION BY RUNNING CHECKLOOP ON EVERY SECOND CELL ON EVERY SECOND ROW SO X+2 and Y+2
 
 //MAKE STUFF FALL IN THE DIRECTION THE PLAYER CLICKS!!!
 
+<<<<<<< Updated upstream
+=======
+//Make the check function return something if it doesn't find any matches. Recursiony.
+
+=======
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 public class CellManager : MonoBehaviour
 {
+    public SpriteRenderer render;       //SpriteRenderer of current cell
+
     #region Private Variables
     private static CellManager previousSelected = null;     //Stores details of first selected cell
 
@@ -29,12 +39,6 @@ public class CellManager : MonoBehaviour
     bool antibaryon = false;
 
     BoardManager bm = BoardManager.instance;
-    #endregion
-
-    #region Public Variables
-    public int protons;     //Number of protons matched
-    public int neutrons;    //Number of neutrons matched
-    public SpriteRenderer render;       //SpriteRenderer of current cell
     #endregion
 
     #region Utility Functions
@@ -90,18 +94,14 @@ public class CellManager : MonoBehaviour
         Sprite tempSprite = render2.sprite;
         render2.sprite = render.sprite;
         render.sprite = tempSprite;
+        return AnhilationAndDecay(render, render2) || AnhilationAndDecay(render2, render);
+    }
+
+    bool AnhilationAndDecay(SpriteRenderer render, SpriteRenderer render2)
+    {
         string quark = render.sprite.name;
 
-        if (quark[0] == 'R' && render2.sprite.name[0] == 'C' || quark[0] == 'C' && render2.sprite.name[0] == 'R')
-        {
-            if(quark[quark.Length - 1] == render2.sprite.name[render2.sprite.name.Length - 1])
-            {
-                render2.sprite = null;
-                render.sprite = null;
-                return true;
-            }
-        }
-        if (quark[0] == 'G' && render2.sprite.name[0] == 'M' || quark[0] == 'M' && render2.sprite.name[0] == 'G')
+        if (quark[0] == 'R' && render2.sprite.name[0] == 'C')
         {
             if (quark[quark.Length - 1] == render2.sprite.name[render2.sprite.name.Length - 1])
             {
@@ -110,7 +110,16 @@ public class CellManager : MonoBehaviour
                 return true;
             }
         }
-        if (quark[0] == 'B' && render2.sprite.name[0] == 'Y' || quark[0] == 'Y' && render2.sprite.name[0] == 'B')
+        if (quark[0] == 'G' && render2.sprite.name[0] == 'M')
+        {
+            if (quark[quark.Length - 1] == render2.sprite.name[render2.sprite.name.Length - 1])
+            {
+                render2.sprite = null;
+                render.sprite = null;
+                return true;
+            }
+        }
+        if (quark[0] == 'B' && render2.sprite.name[0] == 'Y')
         {
             if (quark[quark.Length - 1] == render2.sprite.name[render2.sprite.name.Length - 1])
             {
@@ -217,8 +226,9 @@ public class CellManager : MonoBehaviour
 
                     StartCoroutine(bm.ShiftAlLeft());
 
-
                     previousSelected.Deselect();
+
+                    bm.Turn--;
                 }
                 else
                 {
@@ -249,7 +259,7 @@ public class CellManager : MonoBehaviour
 
                     if (MatCheck(sprite1, sprite2))     //Checks for matches, and deletes when a match is found, otherwise returns false
                     {
-                        BoardManager.instance.IsShifting = false;
+                        bm.IsShifting = false;
                         return true;
                     }
                 }
@@ -264,12 +274,12 @@ public class CellManager : MonoBehaviour
             {
                 if (MatCheck(sprite1, sprite2))
                 {
-                    BoardManager.instance.IsShifting = false;
+                    bm.IsShifting = false;
                     return true;
                 }
             }
         }
-        BoardManager.instance.IsShifting = false;
+        bm.IsShifting = false;
         return false;
     }
 
@@ -305,22 +315,63 @@ public class CellManager : MonoBehaviour
                 {
                     //Deletes sprites and resets values
                     if (baryon)
+<<<<<<< Updated upstream
                         bm.neutrons++;
+=======
+<<<<<<< Updated upstream
+                        neutrons++;
+>>>>>>> Stashed changes
                     else
                         bm.neutrons--;
                     sprite1.sprite = null;
                     sprite2.sprite = null;
                     render.sprite = null;
+<<<<<<< Updated upstream
                     bm.IsShifting = true;
+=======
+                    BoardManager.instance.IsShifting = true;
+=======
+                        bm.Neutrons++;
+                    else
+                        bm.Neutrons--;
+
+                    sprite2.transform.parent.gameObject.GetComponent<Animator>().SetTrigger(Animator.StringToHash("WhiteFlash"));
+                    render.transform.parent.gameObject.GetComponent<Animator>().SetTrigger(Animator.StringToHash("WhiteFlash"));
+                    sprite1.transform.parent.gameObject.GetComponent<Animator>().SetTrigger(Animator.StringToHash("WhiteFlash"));
+
+                    sprite1.sprite = null;
+                    sprite2.sprite = null;
+                    render.sprite = null;
+
+                    bm.IsShifting = true;
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
                     Reset();
                     return true;
                 }
                 if (charge == 1)
                 {
                     if (baryon)
+<<<<<<< Updated upstream
                         bm.protons++;
                     else
                         bm.protons--;
+=======
+<<<<<<< Updated upstream
+                        protons++;
+                    else
+                        protons--;
+=======
+                        bm.Protons++;
+                    else
+                        bm.Protons--;
+
+                    sprite2.transform.parent.gameObject.GetComponent<Animator>().SetTrigger(Animator.StringToHash("WhiteFlash"));
+                    render.transform.parent.gameObject.GetComponent<Animator>().SetTrigger(Animator.StringToHash("WhiteFlash"));
+                    sprite1.transform.parent.gameObject.GetComponent<Animator>().SetTrigger(Animator.StringToHash("WhiteFlash"));
+
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
                     sprite1.sprite = null;
                     sprite2.sprite = null;
                     render.sprite = null;
